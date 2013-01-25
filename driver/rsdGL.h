@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2013 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +23,13 @@
 
 #define RSD_CALL_GL(x, ...) rsc->setWatchdogGL(#x, __LINE__, __FILE__); x(__VA_ARGS__); rsc->setWatchdogGL(NULL, 0, NULL)
 
+#ifdef IMX5_RS_FIXUP
+#include "gui/SurfaceTexture.h"
+
+using namespace android;
+using namespace android::renderscript;
+#endif
+
 class RsdShaderCache;
 class RsdVertexArrayState;
 class RsdFrameBufferObj;
@@ -39,6 +47,9 @@ typedef struct RsdGLRec {
         EGLSurface surface;
         EGLSurface surfaceDefault;
         EGLDisplay display;
+#ifdef IMX5_RS_FIXUP
+        sp<BufferQueue> bufferqueue;
+#endif
     } egl;
 
     struct {

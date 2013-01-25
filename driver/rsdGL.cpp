@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2013 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +163,14 @@ void rsdGLShutdown(const Context *rsc) {
     if (dc->gl.egl.context != EGL_NO_CONTEXT) {
         RSD_CALL_GL(eglMakeCurrent, dc->gl.egl.display,
                     EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+#ifdef IMX5_RS_FIXUP
+        /* Make sure to disconnect the DummyConsumer to clear up the BufferQueue mQueue. */
+        /* This is needed for z430 GPU since eglCreateWindowSurface post 2 buffers to */
+        /* this default surface BufferQueue. When eglDestroySurface is called it waits for */
+        /* BufferQueue mQueue to be empty. Since its a Dummy, there is no one consuming */
+        /* the buffers from mQueue, hence Disconnect the consumer explicitly */
+        dc->gl.egl.bufferqueue->consumerDisconnect();
+#endif
         RSD_CALL_GL(eglDestroySurface, dc->gl.egl.display, dc->gl.egl.surfaceDefault);
         if (dc->gl.egl.surface != EGL_NO_SURFACE) {
             RSD_CALL_GL(eglDestroySurface, dc->gl.egl.display, dc->gl.egl.surface);
@@ -330,6 +339,13 @@ bool rsdGLInit(const Context *rsc) {
     sp<BufferQueue> bq = new BufferQueue();
     bq->consumerConnect(new DummyConsumer());
     sp<Surface> stc(new Surface(static_cast<sp<IGraphicBufferProducer> >(bq)));
+
+#ifdef IMX5_RS_FIXUP
+    /* Store the BufferQueue to disconnect the dummy consumer before destroying surfaceDefault */
+    dc->gl.egl.bufferqueue = bq;
+    /* Set the MaxBuffer Count to 3 as the opengl needs 3 buffers */
+    dc->gl.egl.bufferqueue->setDefaultMaxBufferCount(3);
+#endif
 
     dc->gl.egl.surfaceDefault = eglCreateWindowSurface(dc->gl.egl.display, dc->gl.egl.config,
                                                        static_cast<ANativeWindow*>(stc.get()),

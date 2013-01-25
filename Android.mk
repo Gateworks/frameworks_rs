@@ -39,6 +39,10 @@ LOCAL_SHARED_LIBRARIES += libRS libRSCpuRef
 LOCAL_SHARED_LIBRARIES += liblog libcutils libutils libEGL libGLESv1_CM libGLESv2
 LOCAL_SHARED_LIBRARIES += libbcc libbcinfo libLLVM libui libgui libsync
 
+ifeq ($(TARGET_BOARD_PLATFORM), imx5x)
+	LOCAL_CFLAGS += -DIMX5_RS_FIXUP
+endif
+
 LOCAL_C_INCLUDES += frameworks/compile/libbcc/include
 
 LOCAL_CFLAGS += $(rs_base_CFLAGS)
