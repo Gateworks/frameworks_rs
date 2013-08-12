@@ -24,7 +24,7 @@
 #define RSD_CALL_GL(x, ...) rsc->setWatchdogGL(#x, __LINE__, __FILE__); x(__VA_ARGS__); rsc->setWatchdogGL(NULL, 0, NULL)
 
 #ifdef IMX5_RS_FIXUP
-#include "gui/SurfaceTexture.h"
+#include "gui/BufferQueue.h"
 
 using namespace android;
 using namespace android::renderscript;
